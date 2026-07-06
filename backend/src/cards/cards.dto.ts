@@ -19,6 +19,9 @@ export class CreateCardDto {
   @IsEnum(['visa', 'mastercard', 'amex'])
   card_type: string;
 
+  @IsEnum(['credit', 'debit'])
+  card_kind: string;
+
   @IsEnum(['green', 'dark', 'brown', 'purple', 'gold'])
   theme: string;
 
@@ -31,6 +34,10 @@ export class CreateCardDto {
   @Min(0)
   @Type(() => Number)
   credit_limit: number;
+
+  @IsOptional()
+  @IsString()
+  savings_pot_id?: string | null;
 }
 
 export class UpdateCardDto {
@@ -53,4 +60,17 @@ export class UpdateCardDto {
   @Min(0)
   @Type(() => Number)
   credit_limit?: number;
+
+  @IsOptional()
+  @IsString()
+  expiry_month?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(4, 4)
+  expiry_year?: string;
+
+  @IsOptional()
+  @IsString()
+  savings_pot_id?: string | null;
 }

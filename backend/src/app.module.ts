@@ -3,6 +3,8 @@ import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { CardsModule } from './cards/cards.module';
@@ -16,11 +18,18 @@ import { IntelligenceModule } from './intelligence/intelligence.module';
 import { SummariesModule } from './summaries/summaries.module';
 import { BillingModule } from './billing/billing.module';
 import { LicensesModule } from './licenses/licenses.module';
+import { SavingsPotsModule } from './savings-pots/savings-pots.module';
+import { RecurringTransactionsModule } from './recurring-transactions/recurring-transactions.module';
+import { NetWorthModule } from './net-worth/net-worth.module';
+import { DebtsModule } from './debts/debts.module';
+import { HouseholdsModule } from './households/households.module';
+import { SupabaseService } from './common/supabase.service';
 import { AuthGuard } from './common/guards/auth.guard';
 import { AlertService } from './common/alert.service';
 import { GlobalExceptionFilter } from './common/filters/http-exception.filter';
 
 @Module({
+  controllers: [AppController],
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     ScheduleModule.forRoot(),
@@ -39,9 +48,16 @@ import { GlobalExceptionFilter } from './common/filters/http-exception.filter';
     SummariesModule,
     BillingModule,
     LicensesModule,
+    SavingsPotsModule,
+    RecurringTransactionsModule,
+    NetWorthModule,
+    DebtsModule,
+    HouseholdsModule,
   ],
   providers: [
+    AppService,
     AlertService,
+    SupabaseService,
     // Guard order: ThrottlerGuard → AuthGuard → SubscriptionGuard (in BillingModule)
     { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: AuthGuard },

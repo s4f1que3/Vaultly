@@ -43,7 +43,8 @@ export const useRecurringStore = create<RecurringState>((set, get) => ({
 
   addSubscription: async (data) => {
     const created = await api.post<Record<string, unknown>>('/subscriptions', data);
-    const item: RecurringTransaction = {
+    // Subscriptions only carry a subset of the recurring row fields
+    const item = {
       id: created.id as string,
       user_id: created.user_id as string,
       name: created.company as string,
@@ -59,7 +60,7 @@ export const useRecurringStore = create<RecurringState>((set, get) => ({
       color: created.color as string | undefined,
       source: 'subscription',
       created_at: (created.created_at as string) ?? new Date().toISOString(),
-    };
+    } as RecurringTransaction;
     set((state) => ({ items: [item, ...state.items] }));
   },
 

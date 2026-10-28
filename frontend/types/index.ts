@@ -537,3 +537,169 @@ export interface SummaryPeriods {
   months: { month: number; year: number; label: string }[];
   years: number[];
 }
+
+// ─── Debt Payoff ───────────────────────────────────────────────────────────────
+export type PayoffStrategy = 'avalanche' | 'snowball';
+
+export interface DebtPayoffDebtEntry {
+  id: string;
+  name: string;
+  balance: number;
+  payment: number;
+  interest: number;
+}
+
+export interface DebtPayoffScheduleEntry {
+  month: number;
+  label: string;
+  totalBalance: number;
+  totalPaid: number;
+  debts: DebtPayoffDebtEntry[];
+}
+
+export interface DebtPayoffOrderEntry {
+  id: string;
+  name: string;
+  payoffMonth: number;
+  payoffLabel: string;
+}
+
+export interface DebtPayoffPlan {
+  strategy: PayoffStrategy;
+  monthlyBudget: number;
+  payoffMonths: number;
+  payoffDate: string;
+  totalInterestPaid: number;
+  totalPaid: number;
+  schedule: DebtPayoffScheduleEntry[];
+  debtOrder: DebtPayoffOrderEntry[];
+}
+
+// ─── CSV Import ────────────────────────────────────────────────────────────────
+export interface CsvImportRow {
+  date: string;
+  description: string;
+  amount: number;
+  type: TransactionType;
+  category: TransactionCategory;
+  _valid: boolean;
+  _error?: string;
+}
+
+export interface CsvImportPreview {
+  rows: CsvImportRow[];
+  totalRows: number;
+  validRows: number;
+  invalidRows: number;
+}
+
+// ─── Net Worth & Liabilities ───────────────────────────────────────────────────
+export type LiabilityType = 'mortgage' | 'auto_loan' | 'student_loan' | 'credit_card' | 'personal_loan' | 'other';
+
+export interface Liability {
+  id: string;
+  user_id: string;
+  name: string;
+  type: LiabilityType;
+  balance: number;
+  original_amount: number | null;
+  down_payment: number | null;
+  interest_rate: number;
+  minimum_payment: number;
+  term_years: number | null;
+  start_date: string | null;
+  budget_category: string | null;
+  recurring_transaction_id: string | null;
+  created_at: string;
+}
+
+export interface NetWorthBreakdownItem {
+  label: string;
+  amount: number;
+}
+
+export interface NetWorth {
+  netWorth: number;
+  totalAssets: number;
+  totalLiabilities: number;
+  assets: {
+    cardBalances: number;
+    savingsPots: number;
+    goalSavings: number;
+    breakdown: NetWorthBreakdownItem[];
+  };
+  liabilities: {
+    items: Liability[];
+  };
+}
+
+// ─── Notifications ─────────────────────────────────────────────────────────────
+export type NotificationType = 'budget_alert' | 'goal_achieved' | 'transaction' | 'system';
+
+export interface Notification {
+  id: string;
+  user_id: string;
+  type: NotificationType;
+  title: string;
+  body: string;
+  is_read: boolean;
+  created_at: string;
+}
+
+// ─── Recurring Transactions ────────────────────────────────────────────────────
+export interface RecurringTransaction {
+  id: string;
+  user_id: string;
+  name: string;
+  amount: number;
+  type: TransactionType;
+  category_id: string;
+  card_id: string | null;
+  frequency: string;
+  day_of_month: number | null;
+  day_of_week: number | null;
+  start_date: string;
+  end_date: string | null;
+  next_due_date: string;
+  last_processed_date: string | null;
+  merchant: string | null;
+  description: string | null;
+  linked_category: string | null;
+  linked_type: TransactionType | null;
+  linked_budget_impact: string | null;
+  is_active: boolean;
+  created_at: string;
+  // Present on the combined recurring + subscription list
+  category?: string;
+  source?: 'recurring' | 'subscription';
+  icon?: string;
+  color?: string;
+  company?: string;
+  period?: 'monthly' | 'yearly';
+  billing_day?: number;
+  billing_month?: number | null;
+}
+
+// ─── Households ────────────────────────────────────────────────────────────────
+export interface Household {
+  id: string;
+  name: string;
+  owner_id: string;
+  created_at: string;
+}
+
+export interface HouseholdMember {
+  id: string;
+  user_id: string;
+  role: 'owner' | 'member';
+  name?: string;
+  full_name?: string;
+  email?: string;
+}
+
+export interface HouseholdInvite {
+  id: string;
+  household_id: string;
+  invited_email: string;
+  created_at: string;
+}

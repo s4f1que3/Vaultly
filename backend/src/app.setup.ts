@@ -8,7 +8,7 @@ export function configureApp(app: INestApplication) {
     app.useGlobalFilters(new AllExceptionsFilter())
 
     const corsOptions: CorsOptions = {
-      origin: ['http://localhost:3001', 'https://vaultly.cash', 'http://localhost:3000'],
+      origin: ['http://localhost:3001', 'https://vaultly.cash', 'https://www.vaultly.cash', 'http://localhost:3000'],
       methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
       credentials: true,
       allowedHeaders: 'Content-Type,Authorization'

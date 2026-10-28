@@ -12,7 +12,7 @@ import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
 import { IntelligenceModule } from '../intelligence/intelligence.module';
 import { SummariesModule } from '../summaries/summaries.module';
 import { SavingsPotsModule } from '../savings-pots/savings-pots.module';
-import { GeneralLimiter } from 'rate-limit/general.limiter';
+import { GeneralLimiter } from '../rate-limit/general.limiter';
 import { BankAccountModule } from '../bank_accounts/bank.module';
 import { EmailModule } from '../emailing/email.module';
 
@@ -37,11 +37,10 @@ import { EmailModule } from '../emailing/email.module';
       provide: APP_GUARD, 
       useClass: GeneralLimiter
     },
-    /*{ 
+    { 
       provide: APP_FILTER, 
       useClass: SentryGlobalFilter
     },
-    */
   ],
 })
 export class AppModule {}

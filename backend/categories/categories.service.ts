@@ -1,0 +1,123 @@
+import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
+import { supabaseService } from '@supabase/supabase.service';
+
+const DEFAULT_CATEGORIES = [
+  { name: 'food',          icon: '🍔', color: '#f59e0b' },
+  { name: 'transport',     icon: '🚗', color: '#3b82f6' },
+  { name: 'shopping',      icon: '🛍️', color: '#ec4899' },
+  { name: 'entertainment', icon: '🎬', color: '#8b5cf6' },
+  { name: 'health',        icon: '💊', color: '#10b981' },
+  { name: 'utilities',     icon: '⚡', color: '#06b6d4' },
+  { name: 'housing',       icon: '🏠', color: '#f97316' },
+  { name: 'education',     icon: '📚', color: '#6366f1' },
+  { name: 'salary',        icon: '💰', color: '#57c93c' },
+  { name: 'investment',    icon: '📈', color: '#14b8a6' },
+  { name: 'transfer',      icon: '🔄', color: '#9c9585' },
+  { name: 'other',         icon: '📦', color: '#5c5648' },
+  { name: 'general',       icon: '🗂️', color: '#94a3b8' },
+];
+
+@Injectable()
+export class CategoriesService {
+  // In-process cache: userId → Map<slug, uuid>
+  private cache = new Map<string, Map<string, string>>();
+
+  constructor(private readonly supabase: supabaseService) {}
+
+  async findAll(userId: string) {
+    const { data, error } = await this.supabase.db
+      .from('Categories')
+      .select('*')
+      .eq('user_id', userId)
+      .order('name');
+    if (error) throw new Error(error.message);
+    return { data };
+  }
+
+  /** Returns the UUID for a category slug, creating the row if needed. */
+  async resolveId(userId: string, slug: string): Promise<string> {
+    const userCache = this.cache.get(userId);
+    if (userCache?.has(slug)) return userCache.get(slug)!;
+
+    await this.ensureDefaults(userId);
+    return this.cache.get(userId)?.get(slug) ?? await this.createCategory(userId, slug);
+  }
+
+  /** Returns the slug (name) for a category UUID, or the UUID itself as fallback. */
+  async resolveSlug(userId: string, categoryId: string): Promise<string> {
+    await this.ensureDefaults(userId);
+    const userCache = this.cache.get(userId);
+    for (const [slug, id] of userCache ?? []) {
+      if (id === categoryId) return slug;
+    }
+    return categoryId;
+  }
+
+  /** Seeds the 12 default categories for a user if they don't exist yet. */
+  async ensureDefaults(userId: string): Promise<void> {
+    if (this.cache.has(userId)) return;
+
+    const { data: existing, error: selectError } = await this.supabase.db
+      .from('Categories')
+      .select('id, name')
+      .eq('user_id', userId);
+    if (selectError) throw new BadRequestException(selectError.message);
+
+    const existingMap = new Map<string, string>(
+      (existing ?? []).map((c: { id: string; name: string }) => [c.name, c.id]),
+    );
+
+    const missing = DEFAULT_CATEGORIES.filter(c => !existingMap.has(c.name));
+
+    if (missing.length > 0) {
+      const { data: created, error: insertError } = await this.supabase.db
+        .from('Categories')
+        .insert(missing.map(c => ({ ...c, user_id: userId, is_default: true })))
+        .select('id, name');
+      if (insertError) throw new BadRequestException(insertError.message);
+
+      for (const row of created ?? []) {
+        existingMap.set(row.name, row.id);
+      }
+    }
+
+    this.cache.set(userId, existingMap);
+  }
+
+  async createCustom(userId: string, label: string, emoji: string) {
+    const slug = label.toLowerCase().trim().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+    if (slug.length < 2) throw new BadRequestException('Category name too short after formatting');
+
+    await this.ensureDefaults(userId);
+
+    if (this.cache.get(userId)?.has(slug)) {
+      throw new ConflictException(`Category "${slug}" already exists`);
+    }
+
+    const { data, error } = await this.supabase.db
+      .from('Categories')
+      .insert({ name: slug, icon: emoji, color: '#6366f1', user_id: userId, is_default: false })
+      .select('id, name, icon, color')
+      .single();
+
+    if (error) throw new BadRequestException(error.message);
+    this.cache.get(userId)?.set(slug, (data as { id: string }).id);
+
+    return { slug, label, emoji, color: '#6366f1' };
+  }
+
+  private async createCategory(userId: string, slug: string): Promise<string> {
+    const defaults = DEFAULT_CATEGORIES.find(c => c.name === slug) ?? {
+      name: slug, icon: '📦', color: '#5c5648',
+    };
+    const { data, error } = await this.supabase.db
+      .from('Categories')
+      .insert({ ...defaults, user_id: userId, is_default: false })
+      .select('id')
+      .single();
+    if (error) throw new BadRequestException(error.message);
+    const id = (data as { id: string }).id;
+    this.cache.get(userId)?.set(slug, id);
+    return id;
+  }
+}

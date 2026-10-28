@@ -2,7 +2,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { INestApplication } from '@nestjs/common';
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 import helmet from 'helmet';
-import { AllExceptionsFilter } from '@/exceptions/all-exceptions.filter';
+import { AllExceptionsFilter } from '../exceptions/all-exceptions.filter';
 
 export function configureApp(app: INestApplication) {
     app.useGlobalFilters(new AllExceptionsFilter())

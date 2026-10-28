@@ -13,8 +13,8 @@ import { IntelligenceModule } from '../intelligence/intelligence.module';
 import { SummariesModule } from '../summaries/summaries.module';
 import { SavingsPotsModule } from '../savings-pots/savings-pots.module';
 import { GeneralLimiter } from 'rate-limit/general.limiter';
-import { BankAccountModule } from '@/bank_accounts/bank.module';
-import { EmailModule } from '@/emailing/email.module';
+import { BankAccountModule } from '../bank_accounts/bank.module';
+import { EmailModule } from '../emailing/email.module';
 
 @Module({
   imports: [

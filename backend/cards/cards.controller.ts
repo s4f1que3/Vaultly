@@ -1,8 +1,8 @@
 import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards, Header } from '@nestjs/common';
 import { CardsService } from './cards.service';
 import { CreateCardDto, UpdateCardDto } from './cards.dto';
-import { AuthGuard } from '@guards/auth.guard';
-import { CurrentUser } from '@decorators/user.decorator';
+import { AuthGuard } from '../guards/auth.guard';
+import { CurrentUser } from '../decorators/user.decorator';
 import type { User } from '@supabase/supabase-js';
 
 @Controller('cards')

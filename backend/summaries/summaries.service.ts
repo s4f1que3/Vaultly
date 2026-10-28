@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { supabaseService } from '@supabase/supabase.service';
+import { supabaseService } from '../supabase/supabase.service';
 import { CategoriesService } from '../categories/categories.service';
 
 const MONTH_NAMES = [

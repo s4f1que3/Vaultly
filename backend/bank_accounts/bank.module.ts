@@ -1,7 +1,7 @@
-import { BankAccountsController } from "@/bank_accounts/bank.controller";
-import { BankAccountsService } from "@/bank_accounts/bank.service";
+import { BankAccountsController } from "./bank.controller";
+import { BankAccountsService } from "./bank.service";
 import { Module } from "@nestjs/common";
-import { SupabaseModule } from "@/supabase/supabase.module";
+import { SupabaseModule } from "../supabase/supabase.module";
 
 @Module({
     controllers: [BankAccountsController],

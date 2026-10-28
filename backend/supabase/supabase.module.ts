@@ -1,8 +1,8 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
-import { supabaseService } from "@supabase/supabase.service";
+import { supabaseService } from "./supabase.service";
 import { InternalServerErrorException, Module, Scope } from "@nestjs/common";
 import { Request } from "express";
-import { Database } from "@/database.types";
+import { Database } from "../database.types";
 import * as sentry from "@sentry/nestjs"
 import { REQUEST } from "@nestjs/core";
 

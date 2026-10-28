@@ -1,4 +1,4 @@
-import { supabaseAdminService } from '@/supabase/supabase_admin.service';
+import { supabaseAdminService } from '../supabase/supabase_admin.service';
 import { Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException,} from '@nestjs/common';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 

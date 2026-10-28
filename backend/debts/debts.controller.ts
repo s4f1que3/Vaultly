@@ -1,7 +1,7 @@
 import { Controller, Post, Body, UseGuards } from '@nestjs/common';
 import { DebtsService } from './debts.service';
-import { AuthGuard } from '@guards/auth.guard';
-import { CurrentUser } from '@decorators/user.decorator';
+import { AuthGuard } from '../guards/auth.guard';
+import { CurrentUser } from '../decorators/user.decorator';
 import type { User } from '@supabase/supabase-js';
 
 @Controller('debts')

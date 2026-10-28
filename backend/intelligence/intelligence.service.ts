@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { supabaseService } from '@supabase/supabase.service';
+import { supabaseService } from '../supabase/supabase.service';
 import { CategoriesService } from '../categories/categories.service';
 import { SimulateDto } from './intelligence.dto';
-import { emailingService } from '@/emailing/emailing.service';
+import { emailingService } from '../emailing/emailing.service';
 
 // Built-in merchant → category heuristics (checked before DB rules)
 const MERCHANT_PATTERNS: { pattern: RegExp; category: string }[] = [

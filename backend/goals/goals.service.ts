@@ -1,9 +1,9 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { supabaseService } from '@supabase/supabase.service';
+import { supabaseService } from '../supabase/supabase.service';
 import { CreateGoalDto, UpdateGoalDto, ContributeDto } from './goals.dto';
-import { emailingService } from '@/emailing/emailing.service';
-import { ToHttpException } from '@/exceptions/exception.service';
-import { supabaseAdminService } from '@/supabase/supabase_admin.service';
+import { emailingService } from '../emailing/emailing.service';
+import { ToHttpException } from '../exceptions/exception.service';
+import { supabaseAdminService } from '../supabase/supabase_admin.service';
 
 @Injectable()
 export class GoalsService {

@@ -1,4 +1,4 @@
-import { Database } from "@/database.types";
+import { Database } from "../database.types";
 import { supabaseAdminService } from "./supabase_admin.service";
 import { InternalServerErrorException, Module, NotFoundException, Request } from "@nestjs/common";
 import * as sentry from "@sentry/browser"

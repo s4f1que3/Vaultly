@@ -1,7 +1,7 @@
 import { Controller, Get, Patch, Body, UseGuards } from '@nestjs/common';
 import { SettingsService } from './settings.service';
-import { AuthGuard } from '@guards/auth.guard';
-import { CurrentUser } from '@decorators/user.decorator';
+import { AuthGuard } from '../guards/auth.guard';
+import { CurrentUser } from '../decorators/user.decorator';
 import type { User } from '@supabase/supabase-js';
 
 @Controller('settings')

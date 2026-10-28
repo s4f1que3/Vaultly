@@ -1,8 +1,8 @@
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException,} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
-import { IS_PUBLIC_KEY } from '@decorators/public.decorator';
-import { supabaseService } from '@supabase/supabase.service';
+import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
+import { supabaseService } from '../supabase/supabase.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {

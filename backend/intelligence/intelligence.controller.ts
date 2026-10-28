@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
-import { AuthGuard } from '@guards/auth.guard';
-import { CurrentUser } from '@decorators/user.decorator';
+import { AuthGuard } from '../guards/auth.guard';
+import { CurrentUser } from '../decorators/user.decorator';
 import { IntelligenceService } from './intelligence.service';
 import { CategorySuggestDto, ProjectionsQueryDto, SimulateDto } from './intelligence.dto';
 import type { User } from '@supabase/supabase-js';

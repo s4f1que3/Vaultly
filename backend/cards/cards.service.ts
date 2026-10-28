@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { supabaseService } from '@supabase/supabase.service';
+import { supabaseService } from '../supabase/supabase.service';
 import { CreateCardDto, UpdateCardDto } from './cards.dto';
 
 type DbCard = Record<string, unknown>;

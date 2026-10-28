@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
-import { supabaseService } from '@supabase/supabase.service';
+import { supabaseService } from '../supabase/supabase.service';
 import { CategoriesService } from '../categories/categories.service';
 import { CreateSubscriptionDto, UpdateSubscriptionDto } from './subscriptions.dto';
 

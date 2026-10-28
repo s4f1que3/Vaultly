@@ -1,8 +1,8 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, UseGuards } from "@nestjs/common";
-import { BankAccountsService } from "@/bank_accounts/bank.service";
-import { AuthGuard } from "@/guards/auth.guard";
-import { CreateBankAccountDto, UpdateBankAccountDto } from "@/bank_accounts/bank.dto";
-import { CurrentUser } from "@/decorators/user.decorator";
+import { BankAccountsService } from "./bank.service";
+import { AuthGuard } from "../guards/auth.guard";
+import { CreateBankAccountDto, UpdateBankAccountDto } from "./bank.dto";
+import { CurrentUser } from "../decorators/user.decorator";
 import type { User } from "@supabase/supabase-js";
 
 @Controller('bank-accounts')

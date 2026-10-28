@@ -1,11 +1,11 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { supabaseService } from '@supabase/supabase.service';
+import { supabaseService } from '../supabase/supabase.service';
 import { CategoriesService } from '../categories/categories.service';
 import { IntelligenceService } from '../intelligence/intelligence.service';
 import { CreateTransactionDto, UpdateTransactionDto, TransactionQueryDto } from './transactions.dto';
-import { emailingService } from '@/emailing/emailing.service';
-import { ToHttpException } from '@/exceptions/exception.service';
-import { supabaseAdminService } from '@/supabase/supabase_admin.service';
+import { emailingService } from '../emailing/emailing.service';
+import { ToHttpException } from '../exceptions/exception.service';
+import { supabaseAdminService } from '../supabase/supabase_admin.service';
 
 @Injectable()
 export class TransactionsService {

@@ -4,8 +4,8 @@ import {
 } from '@nestjs/common';
 import { TransactionsService } from './transactions.service';
 import { CreateTransactionDto, UpdateTransactionDto, TransactionQueryDto } from './transactions.dto';
-import { AuthGuard } from '@guards/auth.guard';
-import { CurrentUser } from '@decorators/user.decorator';
+import { AuthGuard } from '../guards/auth.guard';
+import { CurrentUser } from '../decorators/user.decorator';
 import type { User } from '@supabase/supabase-js';
 
 @Controller('transactions')

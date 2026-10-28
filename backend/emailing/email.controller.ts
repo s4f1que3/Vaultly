@@ -1,6 +1,6 @@
 import { Body, Controller, Post, Req, UseGuards, UseInterceptors } from "@nestjs/common";
-import { emailingService } from "@emailing/emailing.service";
-import { emailDTO } from "@emailing/email.dto";
+import { emailingService } from "./emailing.service";
+import { emailDTO } from "./email.dto";
 
 @Controller('email')
 export class emailController {

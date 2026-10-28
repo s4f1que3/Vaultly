@@ -2,8 +2,8 @@ import { Controller, Get, Post, Body, UseGuards } from '@nestjs/common';
 import type { User } from '@supabase/supabase-js';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './categories.dto';
-import { AuthGuard } from '@guards/auth.guard';
-import { CurrentUser } from '@decorators/user.decorator';
+import { AuthGuard } from '../guards/auth.guard';
+import { CurrentUser } from '../decorators/user.decorator';
 
 @Controller('categories')
 @UseGuards(AuthGuard)

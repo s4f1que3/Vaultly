@@ -1,5 +1,5 @@
 import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
-import { supabaseService } from '@supabase/supabase.service';
+import { supabaseService } from '../supabase/supabase.service';
 
 const DEFAULT_CATEGORIES = [
   { name: 'food',          icon: '🍔', color: '#f59e0b' },

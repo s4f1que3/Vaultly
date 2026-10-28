@@ -1,8 +1,8 @@
 import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards } from '@nestjs/common';
 import { RecurringTransactionsService } from './recurring-transactions.service';
 import { CreateRecurringTransactionDto, UpdateRecurringTransactionDto } from './recurring-transactions.dto';
-import { AuthGuard } from '@guards/auth.guard';
-import { CurrentUser } from '@decorators/user.decorator';
+import { AuthGuard } from '../guards/auth.guard';
+import { CurrentUser } from '../decorators/user.decorator';
 import type { User } from '@supabase/supabase-js';
 
 @Controller('recurring-transactions')

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
-import { Email } from '@emailing/email.class'
-import { buildMessageEmail } from '@emailing/email.template'
+import { Email } from './email.class'
+import { buildMessageEmail } from './email.template'
 
 @Injectable()
 export class emailingService {

@@ -2,8 +2,8 @@ import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards } from '@n
 import type { User } from '@supabase/supabase-js';
 import { SavingsPotsService } from './savings-pots.service';
 import { CreateSavingsPotDto, UpdateSavingsPotDto } from './savings-pots.dto';
-import { AuthGuard } from '@guards/auth.guard';
-import { CurrentUser } from '@decorators/user.decorator';
+import { AuthGuard } from '../guards/auth.guard';
+import { CurrentUser } from '../decorators/user.decorator';
 
 @Controller('savings-pots')
 @UseGuards(AuthGuard)

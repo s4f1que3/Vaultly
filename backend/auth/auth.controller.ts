@@ -1,9 +1,9 @@
 import { Body, Controller, HttpCode, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { AuthGuard } from '@guards/auth.guard';
-import { Public } from '@decorators/public.decorator';
-import { authDTO, changeEmailDTO } from '@/auth/auth.dto';
-import { CurrentUser } from '@/decorators/user.decorator';
+import { AuthGuard } from '../guards/auth.guard';
+import { Public } from '../decorators/public.decorator';
+import { authDTO, changeEmailDTO } from './auth.dto';
+import { CurrentUser } from '../decorators/user.decorator';
 import type { User } from '@supabase/supabase-js';
 
 @Controller('auth')

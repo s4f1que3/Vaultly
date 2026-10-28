@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { IpRateLimitGuard } from "@rate-limit/ip-rate-limit.guard";
+import { IpRateLimitGuard } from "./ip-rate-limit.guard";
 
 @Injectable()
 export class GeneralLimiter extends IpRateLimitGuard {

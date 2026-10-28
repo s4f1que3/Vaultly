@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { supabaseService } from "@supabase/supabase.service";
-import { ToHttpException } from "@/exceptions/exception.service";
+import { supabaseService } from "../supabase/supabase.service";
+import { ToHttpException } from "../exceptions/exception.service";
 
 @Injectable()
 export class BankAccountsService {

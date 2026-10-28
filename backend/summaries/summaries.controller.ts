@@ -1,6 +1,6 @@
 import { Controller, Get, Query, UseGuards, BadRequestException } from '@nestjs/common';
-import { AuthGuard } from '@guards/auth.guard';
-import { CurrentUser } from '@decorators/user.decorator';
+import { AuthGuard } from '../guards/auth.guard';
+import { CurrentUser } from '../decorators/user.decorator';
 import { SummariesService } from './summaries.service';
 import type { User } from '@supabase/supabase-js';
 

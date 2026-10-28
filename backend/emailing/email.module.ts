@@ -1,10 +1,10 @@
 import { Module } from "@nestjs/common";
-import { emailingService } from "@emailing/emailing.service";
-import { emailController } from "@emailing/email.controller";
-import { SupabaseModule } from "@/supabase/supabase.module";
-import { MAILER } from "@/emailing/email.token";
-import { Email } from "@/emailing/email.class";
-import { emailConsole } from "@/emailing/emailing.console.mailer";
+import { emailingService } from "./emailing.service";
+import { emailController } from "./email.controller";
+import { SupabaseModule } from "../supabase/supabase.module";
+import { MAILER } from "./email.token";
+import { Email } from "./email.class";
+import { emailConsole } from "./emailing.console.mailer";
 
 @Module({
     controllers: [emailController],

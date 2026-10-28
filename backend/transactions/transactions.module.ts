@@ -6,9 +6,10 @@ import { CategoriesModule } from '../categories/categories.module';
 import { IntelligenceModule } from '../intelligence/intelligence.module';
 import { SupabaseModule } from '@/supabase/supabase.module';
 import { EmailModule } from '@/emailing/email.module';
+import { SupabaseAdminModule } from '@/supabase/supabase_admin.module';
 
 @Module({
-  imports: [CategoriesModule, IntelligenceModule, SupabaseModule, EmailModule],
+  imports: [CategoriesModule, IntelligenceModule, SupabaseModule, EmailModule, SupabaseAdminModule],
   controllers: [TransactionsController],
   providers: [TransactionsService],
   exports: [TransactionsService],

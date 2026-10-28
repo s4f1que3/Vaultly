@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { supabaseService } from '@supabase/supabase.service';
 import { CategoriesService } from '../categories/categories.service';
 import { SimulateDto } from './intelligence.dto';
+import { emailingService } from '@/emailing/emailing.service';
 
 // Built-in merchant → category heuristics (checked before DB rules)
 const MERCHANT_PATTERNS: { pattern: RegExp; category: string }[] = [
@@ -22,6 +23,7 @@ export class IntelligenceService {
   constructor(
     private readonly supabase: supabaseService,
     private readonly categories: CategoriesService,
+    private readonly email: emailingService
   ) {}
 
   private daysAgo(n: number): string {
@@ -716,10 +718,14 @@ export class IntelligenceService {
       if (!tx.merchant || tx.type !== 'expense') continue;
       recentMerchantCounts.set(tx.merchant, (recentMerchantCounts.get(tx.merchant) ?? 0) + 1);
     }
-    const prevMerchantNames = new Set((prevTxs ?? []).map((t: { merchant: string }) => t.merchant).filter(Boolean));
+    const prevMerchantNames = new Set(
+      (prevTxs ?? [])
+        .map((t) => t.merchant)
+        .filter((merchant): merchant is string => Boolean(merchant)),
+    );
     for (const [merchant, count] of recentMerchantCounts) {
       if (count >= 2 && !prevMerchantNames.has(merchant)) {
-        const latestTx = (recentTxs ?? []).find((t: { merchant: string }) => t.merchant === merchant);
+        const latestTx = (recentTxs ?? []).find((t) => t.merchant === merchant);
         anomalies.push({
           type: 'new_recurring', severity: 'medium',
           title: `New recurring charge: ${merchant}`,
@@ -739,7 +745,7 @@ export class IntelligenceService {
           type: 'large_transaction', severity: tx.amount > avgDailySpend * 10 ? 'high' : 'medium',
           title: 'Large transaction',
           description: `$${tx.amount.toFixed(2)} — ${Math.round(tx.amount / avgDailySpend)}× your daily average`,
-          amount: tx.amount, merchant: tx.merchant, date: tx.date,
+          amount: tx.amount, merchant: tx.merchant ?? undefined, date: tx.date,
           category: await this.categories.resolveSlug(userId, tx.category_id),
         });
       }
@@ -934,29 +940,6 @@ export class IntelligenceService {
     const severityOrder = { critical: 0, danger: 1, warning: 2 };
     alerts.sort((a, b) => severityOrder[a.severity] - severityOrder[b.severity]);
 
-    // Persist critical/danger alerts as notifications (deduplicated by day)
-    const todayStr = today.toISOString().split('T')[0];
-    for (const alert of alerts.filter((a) => a.severity !== 'warning')) {
-      const { data: existing } = await this.supabase.db
-        .from('Notifications')
-        .select('id')
-        .eq('user_id', userId)
-        .eq('type', 'budget_alert')
-        .ilike('title', `%${alert.category}%predictive%`)
-        .gte('created_at', todayStr)
-        .single();
-
-      if (!existing) {
-        await this.supabase.db.from('Notifications').insert({
-          user_id: userId,
-          type: 'budget_alert',
-          title: `Predictive alert: ${alert.category}`,
-          body: alert.message,
-          is_read: false,
-        });
-      }
-    }
-
     return { alerts, total: alerts.length };
   }
 
@@ -984,17 +967,17 @@ export class IntelligenceService {
 
     // Total monthly savings commitment across all goals with deadlines
     const goalCommitments = goals
-      .filter((g: { deadline: string }) => g.deadline)
-      .reduce((s: number, g: { target_amount: number; current_amount: number; deadline: string }) => {
+      .filter((g: { deadline: string | null }) => g.deadline !== null)
+      .reduce((s: number, g: { target_amount: number; current_amount: number; deadline: string | null }) => {
         const monthsLeft = Math.max(1,
-          (new Date(g.deadline).getTime() - today.getTime()) / (1000 * 60 * 60 * 24 * 30),
+          (new Date(g.deadline!).getTime() - today.getTime()) / (1000 * 60 * 60 * 24 * 30),
         );
         return s + Math.max(0, (g.target_amount - g.current_amount) / monthsLeft);
       }, 0);
 
     const results = goals.map((goal: {
       id: string; name: string; target_amount: number; current_amount: number;
-      deadline?: string; icon?: string; color?: string;
+      deadline?: string | null; icon?: string | null; color?: string | null;
     }) => {
       const remaining = goal.target_amount - goal.current_amount;
       const progressPct = goal.target_amount > 0
@@ -1073,8 +1056,8 @@ export class IntelligenceService {
       goals: results,
       context: {
         avgMonthlySavings: this.round2(avgMonthlySavings),
-        totalGoalCommitmentsPerMonth: this.round2(goalCommitments),
-        availableSavings: this.round2(avgMonthlySavings - goalCommitments),
+        totalGoalCommitmentsPerMonth: this.round2(Number(goalCommitments)),
+        availableSavings: this.round2(Number(avgMonthlySavings) - Number(goalCommitments)),
       },
     };
   }

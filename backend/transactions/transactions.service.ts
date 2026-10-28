@@ -5,6 +5,7 @@ import { IntelligenceService } from '../intelligence/intelligence.service';
 import { CreateTransactionDto, UpdateTransactionDto, TransactionQueryDto } from './transactions.dto';
 import { emailingService } from '@/emailing/emailing.service';
 import { ToHttpException } from '@/exceptions/exception.service';
+import { supabaseAdminService } from '@/supabase/supabase_admin.service';
 
 @Injectable()
 export class TransactionsService {
@@ -12,7 +13,8 @@ export class TransactionsService {
     private readonly supabase: supabaseService,
     private readonly categories: CategoriesService,
     private readonly intelligence: IntelligenceService,
-    private readonly email: emailingService
+    private readonly email: emailingService,
+    private readonly supabaseAdmin: supabaseAdminService
   ) {}
 
   async findAll(userId: string, query: TransactionQueryDto) {
@@ -299,7 +301,7 @@ export class TransactionsService {
       .eq('year', year)
       .single();
 
-      const {data: d, error: e} = await this.supabase.db.auth.getUser(userId)
+      const {data: d, error: e} = await this.supabaseAdmin.db.auth.admin.getUserById(userId)
       if(e) throw ToHttpException(e)
       if(!d.user.email) throw new NotFoundException('No email found for user')
 

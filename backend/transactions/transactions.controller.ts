@@ -18,16 +18,6 @@ export class TransactionsController {
     return this.service.findAll(user.id, query);
   }
 
-  @Post('import/preview')
-  importPreview(@CurrentUser() user: User, @Body() body: { csv: string }) {
-    return this.service.previewImport(user.id, body.csv);
-  }
-
-  @Post('import/confirm')
-  importConfirm(@CurrentUser() user: User, @Body() body: { rows: object[] }) {
-    return this.service.confirmImport(user.id, body.rows as never);
-  }
-
   @Post()
   create(@CurrentUser() user: User, @Body() dto: CreateTransactionDto) {
     return this.service.create(user.id, dto);
@@ -43,22 +33,4 @@ export class TransactionsController {
     return this.service.delete(user.id, id);
   }
 
-  @Get(':id/splits')
-  getSplits(@CurrentUser() user: User, @Param('id') id: string) {
-    return this.service.getSplits(user.id, id);
-  }
-
-  @Post(':id/splits')
-  setSplits(
-    @CurrentUser() user: User,
-    @Param('id') id: string,
-    @Body() body: { splits: { category: string; amount: number; note?: string }[] },
-  ) {
-    return this.service.setSplits(user.id, id, body.splits);
-  }
-
-  @Delete(':id/splits')
-  deleteSplits(@CurrentUser() user: User, @Param('id') id: string) {
-    return this.service.deleteSplits(user.id, id);
-  }
 }

@@ -1,5 +1,5 @@
 import 'dotenv/config'
-import './instrument'
+//import './instrument'
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import helmet from 'helmet';
@@ -12,7 +12,7 @@ async function bootstrap() {
 
   const app: INestApplication = await NestFactory.create(AppModule);
 
-    //app.useGlobalFilters(new AllExceptionsFilter())
+    app.useGlobalFilters(new AllExceptionsFilter())
 
     const corsOptions: CorsOptions = {
       origin: ['http://localhost:3001', 'https://vaultly.cash', 'http://localhost:3000'],

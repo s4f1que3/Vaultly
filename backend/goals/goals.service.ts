@@ -3,12 +3,14 @@ import { supabaseService } from '@supabase/supabase.service';
 import { CreateGoalDto, UpdateGoalDto, ContributeDto } from './goals.dto';
 import { emailingService } from '@/emailing/emailing.service';
 import { ToHttpException } from '@/exceptions/exception.service';
+import { supabaseAdminService } from '@/supabase/supabase_admin.service';
 
 @Injectable()
 export class GoalsService {
   constructor(
     private readonly supabase: supabaseService,
-    private readonly email: emailingService
+    private readonly email: emailingService,
+    private readonly supabaseAdmin: supabaseAdminService
   ) {}
 
   async findAll(userId: string) {
@@ -61,7 +63,7 @@ export class GoalsService {
 
     if (error) throw new BadRequestException(error.message);
 
-    const {data: d, error: e} = await this.supabase.db.auth.getUser(userId)
+    const {data: d, error: e} = await this.supabaseAdmin.db.auth.admin.getUserById(userId)
     if(e) throw ToHttpException(e)
     if(!d.user.email) throw new NotFoundException('no email returned for user')
 

@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next';
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://vaultly.app';
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://vaultly.cash';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [

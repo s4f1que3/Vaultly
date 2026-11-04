@@ -12,7 +12,7 @@ import Modal from '@/components/ui/Modal';
 import { useBudgetStore } from '@/stores/useBudgetStore';
 import { useCategoryStore } from '@/stores/useCategoryStore';
 import { Budget, TransactionCategory } from '@/types';
-import { CATEGORY_LABELS, CATEGORY_ICONS, CATEGORY_COLORS, formatCurrency, formatPercentage } from '@/lib/utils/formatters';
+import { CATEGORY_LABELS, CATEGORY_ICONS, formatCurrency, formatPercentage } from '@/lib/utils/formatters';
 
 const schema = z.object({
   category: z.string(),
@@ -71,7 +71,7 @@ function BudgetModal({ isOpen, onClose, budget }: { isOpen: boolean; onClose: ()
     setIsLoading(true);
     try {
       if (isEdit && budget) {
-        const { category: _cat, period: _period, ...updateData } = data;
+        const { period: _period, ...updateData } = data;
         await updateBudget(budget.id, updateData as Partial<Budget>);
       } else {
         await addBudget(data as Partial<Budget>);
@@ -82,7 +82,8 @@ function BudgetModal({ isOpen, onClose, budget }: { isOpen: boolean; onClose: ()
     }
   };
 
-  const defaultKeys = Object.keys(CATEGORY_LABELS) as TransactionCategory[];
+  // "none" isn't a real category, so it can't have a budget
+  const defaultKeys: TransactionCategory[] = (Object.keys(CATEGORY_LABELS) as TransactionCategory[]).filter((k) => k !== 'none');
   const allCategories = [
     ...defaultKeys,
     ...customCategories
@@ -97,8 +98,7 @@ function BudgetModal({ isOpen, onClose, budget }: { isOpen: boolean; onClose: ()
           <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Category</label>
           <select
             {...register('category')}
-            disabled={isEdit}
-            className={`input-base ${isEdit ? 'opacity-50 cursor-not-allowed' : ''}`}
+            className="input-base"
           >
             {allCategories.map((c) => (
               <option key={c} value={c}>
@@ -190,12 +190,14 @@ function BudgetModal({ isOpen, onClose, budget }: { isOpen: boolean; onClose: ()
 
 export default function BudgetsPage() {
   const { budgets, isLoading, fetchBudgets, deleteBudget } = useBudgetStore();
+  const { categories, fetchCategories: loadCategories } = useCategoryStore();
   const [showModal, setShowModal] = useState(false);
   const [editBudget, setEditBudget] = useState<Budget | null>(null);
 
   useEffect(() => {
     fetchBudgets();
-  }, [fetchBudgets]);
+    loadCategories();
+  }, [fetchBudgets, loadCategories]);
 
   const totalBudgeted = budgets.reduce((s, b) => s + b.limit_amount + (b.income_amount ?? 0), 0);
   const totalSpent = budgets.reduce((s, b) => s + b.spent_amount, 0);
@@ -254,6 +256,7 @@ export default function BudgetsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <AnimatePresence>
             {budgets.map((b, i) => {
+              const cat = categories.find((c) => c.id === b.category_id);
               const effectiveLimit = b.limit_amount + (b.income_amount ?? 0);
               const pct = effectiveLimit > 0 ? Math.min((b.spent_amount / effectiveLimit) * 100, 100) : 0;
               const isAlert = pct >= b.alert_threshold;
@@ -271,11 +274,11 @@ export default function BudgetsPage() {
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-2">
-                      <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg" style={{ background: `${CATEGORY_COLORS[b.category]}20` }}>
-                        {CATEGORY_ICONS[b.category]}
+                      <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg" style={{ background: `${cat?.color ?? '#6366f1'}20` }}>
+                        {cat?.icon ?? '📦'}
                       </div>
                       <div>
-                        <p className="text-sm font-semibold text-[var(--color-text-primary)]">{CATEGORY_LABELS[b.category]}</p>
+                        <p className="text-sm font-semibold text-[var(--color-text-primary)] capitalize">{cat?.name.replace(/_/g, ' ') ?? 'Unknown'}</p>
                         <p className="text-xs text-[var(--color-text-muted)] capitalize">{b.period}</p>
                       </div>
                     </div>
@@ -303,7 +306,7 @@ export default function BudgetsPage() {
                           ? 'var(--color-danger)'
                           : isAlert
                           ? 'var(--color-warning)'
-                          : CATEGORY_COLORS[b.category],
+                          : cat?.color ?? '#6366f1',
                       }}
                     />
                   </div>

@@ -195,7 +195,8 @@ function RecurringModal({ isOpen, onClose, item }: { isOpen: boolean; onClose: (
   const selectedType = watch('type');
   const linkedType = watch('linked_type');
 
-  const defaultKeys = Object.keys(CATEGORY_LABELS) as TransactionCategory[];
+  // "none" isn't a real category, so recurring entries can't use it
+  const defaultKeys: TransactionCategory[] = (Object.keys(CATEGORY_LABELS) as TransactionCategory[]).filter((k) => k !== 'none');
   const allCategories = [
     ...defaultKeys,
     ...customCategories.filter((c) => !defaultKeys.includes(c.name as TransactionCategory)).map((c) => c.name as TransactionCategory),

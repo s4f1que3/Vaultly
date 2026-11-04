@@ -4,9 +4,10 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ChevronLeft, Plus, Pencil, Trash2, Landmark, ArrowDownLeft, ArrowUpRight, LucideIcon } from 'lucide-react';
+import { ChevronLeft, Plus, Pencil, Trash2, Landmark, ArrowDownLeft, ArrowUpRight, ArrowLeftRight, LucideIcon } from 'lucide-react';
 import BankAccountTile from '@/components/bank/BankAccountTile';
 import BankAccountModal from '@/components/bank/BankAccountModal';
+import BankTransferModal from '@/components/bank/BankTransferModal';
 import TransactionModal from '@/components/transactions/TransactionModal';
 import { useBankStore } from '@/stores/useBankStore';
 import { useCardStore } from '@/stores/useCardStore';
@@ -35,6 +36,7 @@ export default function BankAccountDetailPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [txLoading, setTxLoading] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
+  const [showTransfer, setShowTransfer] = useState(false);
   const [showAddTx, setShowAddTx] = useState(false);
   const [editTx, setEditTx] = useState<Transaction | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -127,8 +129,9 @@ export default function BankAccountDetailPage() {
       </motion.div>
 
       {/* Quick actions */}
-      <div className="grid grid-cols-3 gap-3 max-w-sm mx-auto my-8">
+      <div className="grid grid-cols-4 gap-3 max-w-md mx-auto my-8">
         <QuickAction icon={Plus} label="Add" tone="primary" onClick={() => setShowAddTx(true)} />
+        <QuickAction icon={ArrowLeftRight} label="Transfer" onClick={() => setShowTransfer(true)} />
         <QuickAction icon={Pencil} label="Edit" onClick={() => setShowEdit(true)} />
         <QuickAction icon={Trash2} label={deleting ? 'Deleting' : 'Delete'} tone="danger" onClick={handleDelete} />
       </div>
@@ -225,6 +228,7 @@ export default function BankAccountDetailPage() {
       )}
 
       <BankAccountModal isOpen={showEdit} onClose={() => setShowEdit(false)} account={account} />
+      <BankTransferModal isOpen={showTransfer} onClose={() => setShowTransfer(false)} defaultFromId={id} />
       <TransactionModal
         isOpen={showAddTx || !!editTx}
         transaction={editTx}

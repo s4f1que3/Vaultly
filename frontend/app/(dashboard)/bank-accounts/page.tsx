@@ -3,10 +3,11 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Plus, ChevronRight, Landmark } from 'lucide-react';
+import { Plus, ChevronRight, Landmark, ArrowLeftRight } from 'lucide-react';
 import PageHeader from '@/components/ui/PageHeader';
 import BankAccountTile from '@/components/bank/BankAccountTile';
 import BankAccountModal from '@/components/bank/BankAccountModal';
+import BankTransferModal from '@/components/bank/BankTransferModal';
 import { CardSkeleton } from '@/components/ui/Skeleton';
 import { useBankStore } from '@/stores/useBankStore';
 import { useCardStore } from '@/stores/useCardStore';
@@ -16,6 +17,7 @@ export default function BankAccountsPage() {
   const { accounts, isLoading, fetchAccounts } = useBankStore();
   const { cards, fetchCards } = useCardStore();
   const [showAdd, setShowAdd] = useState(false);
+  const [showTransfer, setShowTransfer] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -32,9 +34,16 @@ export default function BankAccountsPage() {
         title="Accounts"
         subtitle={`${accounts.length} account${accounts.length !== 1 ? 's' : ''} · Money in banks, tracked in one place`}
         action={
-          <button onClick={() => setShowAdd(true)} className="btn-primary text-sm">
-            <Plus size={16} /> Open account
-          </button>
+          <div className="flex items-center gap-2">
+            {accounts.length >= 2 && (
+              <button onClick={() => setShowTransfer(true)} className="btn-ghost text-sm">
+                <ArrowLeftRight size={16} /> Transfer
+              </button>
+            )}
+            <button onClick={() => setShowAdd(true)} className="btn-primary text-sm">
+              <Plus size={16} /> Open account
+            </button>
+          </div>
         }
       />
 
@@ -130,6 +139,7 @@ export default function BankAccountsPage() {
       )}
 
       <BankAccountModal isOpen={showAdd} onClose={() => setShowAdd(false)} />
+      <BankTransferModal isOpen={showTransfer} onClose={() => setShowTransfer(false)} />
     </div>
   );
 }

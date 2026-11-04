@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { supabaseService } from '../supabase/supabase.service';
 import { CategoriesService } from '../categories/categories.service';
 import { IntelligenceService } from '../intelligence/intelligence.service';
-import { CreateTransactionDto, UpdateTransactionDto, TransactionQueryDto } from './transactions.dto';
+import { CreateTransactionDto, UpdateTransactionDto, TransactionQueryDto, TransactionCategory } from './transactions.dto';
 import { emailingService } from '../emailing/emailing.service';
 import { ToHttpException } from '../exceptions/exception.service';
 import { supabaseAdminService } from '../supabase/supabase_admin.service';
@@ -38,7 +38,7 @@ export class TransactionsService {
 
     if (category) {
       const categoryId = await this.categories.resolveId(userId, category);
-      q = q.eq('category_id', categoryId);
+      q = categoryId ? q.eq('category_id', categoryId) : q.is('category_id', null);
     }
 
     const { data, error, count } = await q;
@@ -65,10 +65,10 @@ export class TransactionsService {
 
   async create(userId: string, dto: CreateTransactionDto) {
     // Auto-categorize from merchant if a learned rule or pattern matches
-    let effectiveCategory = dto.category;
+    let effectiveCategory: TransactionCategory = dto.category ?? 'none';
     if (dto.merchant) {
       const suggested = await this.intelligence.resolveMerchantCategory(userId, dto.merchant);
-      if (suggested) effectiveCategory = suggested as typeof dto.category;
+      if (suggested) effectiveCategory = suggested as TransactionCategory;
     }
 
     const category_id = await this.categories.resolveId(userId, effectiveCategory);
@@ -116,7 +116,7 @@ export class TransactionsService {
       if (dto.bank_account_id) await this.assertBankAccountOwned(userId, dto.bank_account_id);
       update.bank_account_id = dto.bank_account_id || null;
     }
-    let newCategoryId: string | undefined;
+    let newCategoryId: string | null | undefined;
     let newCategorySlug: string | undefined;
 
     if (dto.category) {
@@ -155,7 +155,7 @@ export class TransactionsService {
       await this.adjustBankBalance(userId, newBankAccountId, newBankDelta);
     }
 
-    const oldCategoryId = existing.category_id as string;
+    const oldCategoryId = (existing.category_id as string | null) ?? null;
     const oldSlug = await this.categories.resolveSlug(userId, oldCategoryId);
     const oldDate = existing.date as string;
     const newDate = (dto.date ?? existing.date) as string;
@@ -175,6 +175,7 @@ export class TransactionsService {
     return { ...data, category: resolvedSlug };
   }
 
+
   async delete(userId: string, id: string) {
     const { data: existing } = await this.supabase.db
       .from('Transactions')
@@ -192,22 +193,45 @@ export class TransactionsService {
       .eq('user_id', userId);
 
     if (error) throw new BadRequestException(error.message);
-
     await this.adjustBankBalance(
       userId,
       (existing.bank_account_id as string | null) ?? null,
       -this.bankDelta(existing.amount as number, existing.type as string, existing.budget_impact as string | null),
     );
 
-    const slug = await this.categories.resolveSlug(userId, existing.category_id as string);
-    await this.updateBudgetSpent(userId, existing.category_id as string, slug, existing.date as string);
+    const categoryId = (existing.category_id as string | null) ?? null;
+    const slug = await this.categories.resolveSlug(userId, categoryId);
+    await this.updateBudgetSpent(userId, categoryId, slug, existing.date as string);
 
   }
 
-  /**
-   * Money effect of a transaction on a bank account.
-   * Income adds, expense subtracts, transfers follow budget_impact (increase = money in, decrease = money out).
-   */
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  // private functions
   private bankDelta(amount: number, type: string, budgetImpact?: string | null): number {
     if (type === 'income') return amount;
     if (type === 'expense') return -amount;
@@ -251,12 +275,20 @@ export class TransactionsService {
     if (error) throw new BadRequestException(error.message);
   }
 
-  private async updateBudgetSpent(userId: string, categoryId: string, categorySlug: string, forDate?: string) {
-    const ref = forDate ? new Date(forDate) : new Date();
-    const month = ref.getMonth() + 1;
-    const year = ref.getFullYear();
-    const startOfMonth = new Date(ref.getFullYear(), ref.getMonth(), 1).toISOString();
-    const endOfMonth = new Date(ref.getFullYear(), ref.getMonth() + 1, 0).toISOString();
+  private async updateBudgetSpent(userId: string, categoryId: string | null, categorySlug: string, forDate?: string) {
+    // Uncategorized transactions have no budget to update
+    if (!categoryId) return;
+
+    // Work from the YYYY-MM-DD string, not a Date: new Date('2026-11-01') is UTC midnight,
+    // which lands on Oct 31 in western timezones and shifts the month.
+    const [year, month] = forDate
+      ? forDate.slice(0, 10).split('-').map(Number)
+      : [new Date().getFullYear(), new Date().getMonth() + 1];
+    const monthPrefix = `${year}-${String(month).padStart(2, '0')}`;
+    const lastDay = new Date(year, month, 0).getDate();
+    // The date column is a plain date, so compare against date strings, not ISO timestamps
+    const startOfMonth = `${monthPrefix}-01`;
+    const endOfMonth = `${monthPrefix}-${String(lastDay).padStart(2, '0')}`;
 
     const { data: txs } = await this.supabase.db
       .from('Transactions')
@@ -301,16 +333,16 @@ export class TransactionsService {
       .eq('year', year)
       .single();
 
-      const {data: d, error: e} = await this.supabaseAdmin.db.auth.admin.getUserById(userId)
-      if(e) throw ToHttpException(e)
-      if(!d.user.email) throw new NotFoundException('No email found for user')
-
-    if (budget) {
+    // Alerts are optional: a budget without a threshold just doesn't send one.
+    // Throwing here would fail the request after the transaction is already saved.
+    if (budget?.alert_threshold) {
       const effectiveLimit = (budget.limit_amount ?? 0) + (budget.income_amount ?? 0);
       const pct = effectiveLimit > 0 ? (spent / effectiveLimit) * 100 : 0;
-      if(!budget.alert_threshold) throw new NotFoundException('No budget alert threshold found')
       if (pct >= budget.alert_threshold) {
-        await this.email.sendEmail(`You've used ${pct.toFixed(0)}% of your ${categorySlug} budget (${spent.toFixed(2)} of ${effectiveLimit.toFixed(2)})`, `Budget Alert: ${categorySlug}`, d.user.email) 
+        const {data: d, error: e} = await this.supabaseAdmin.db.auth.admin.getUserById(userId)
+        if(e) throw ToHttpException(e)
+        if(!d.user.email) throw new NotFoundException('No email found for user')
+        await this.email.sendEmail(`You've used ${pct.toFixed(0)}% of your ${categorySlug} budget (${spent.toFixed(2)} of ${effectiveLimit.toFixed(2)})`, `Budget Alert: ${categorySlug}`, d.user.email)
       }
     }
   }

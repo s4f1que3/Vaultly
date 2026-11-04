@@ -8,13 +8,20 @@ export interface BankAccountInput {
   card_linked: string | null;
 }
 
+export interface BankTransferInput {
+  current_account: string;
+  destination_account: string;
+  amount: number;
+}
+
 interface BankState {
   accounts: BankAccount[];
   isLoading: boolean;
   fetchAccounts: () => Promise<void>;
   addAccount: (data: BankAccountInput) => Promise<BankAccount>;
-  updateAccount: (id: string, data: Partial<BankAccountInput>) => Promise<BankAccount>;
+  updateAccount: (id: string, data: Partial<BankAccountInput>) => Promise<void>;
   deleteAccount: (id: string) => Promise<void>;
+  transfer: (data: BankTransferInput) => Promise<void>;
 }
 
 export const useBankStore = create<BankState>((set, get) => ({
@@ -39,11 +46,15 @@ export const useBankStore = create<BankState>((set, get) => ({
   },
 
   updateAccount: async (id, data) => {
-    const updated = await api.patch<BankAccount>(`/bank-accounts/${id}`, data);
+    const updated = await api.patch<BankAccount | null>(`/bank-accounts/${id}`, data);
+    // Backend can respond with an empty body; refetch rather than writing null into the list
+    if (!updated) {
+      await get().fetchAccounts();
+      return;
+    }
     set((state) => ({
       accounts: state.accounts.map((a) => (a.id === id ? updated : a)),
     }));
-    return updated;
   },
 
   deleteAccount: async (id) => {
@@ -55,5 +66,11 @@ export const useBankStore = create<BankState>((set, get) => ({
       set({ accounts: prev });
       throw err;
     }
+  },
+
+  transfer: async (data) => {
+    // Backend moves the money and returns an empty body, so refetch for the new balances
+    await api.post(`/bank-accounts/${data.current_account}`, data);
+    await get().fetchAccounts();
   },
 }));

@@ -131,13 +131,16 @@ export class IntelligenceService {
     // Budget impact for this category — current month only
     await this.categories.ensureDefaults(userId);
     const categoryId = await this.categories.resolveId(userId, category);
-    const { data: budget } = await this.supabase.db
-      .from('Budgets').select('*')
-      .eq('user_id', userId)
-      .eq('category_id', categoryId)
-      .eq('month', today.getMonth() + 1)
-      .eq('year', today.getFullYear())
-      .single();
+    // Uncategorized purchases don't hit any budget
+    const { data: budget } = categoryId
+      ? await this.supabase.db
+          .from('Budgets').select('*')
+          .eq('user_id', userId)
+          .eq('category_id', categoryId)
+          .eq('month', today.getMonth() + 1)
+          .eq('year', today.getFullYear())
+          .single()
+      : { data: null };
 
     let budgetImpact: object | null = null;
     if (budget) {

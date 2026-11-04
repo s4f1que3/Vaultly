@@ -1,6 +1,8 @@
 import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
 import { supabaseService } from '../supabase/supabase.service';
 
+export const NO_CATEGORY = 'none';
+
 const DEFAULT_CATEGORIES = [
   { name: 'food',          icon: '🍔', color: '#f59e0b' },
   { name: 'transport',     icon: '🚗', color: '#3b82f6' },
@@ -34,8 +36,10 @@ export class CategoriesService {
     return { data };
   }
 
-  /** Returns the UUID for a category slug, creating the row if needed. */
-  async resolveId(userId: string, slug: string): Promise<string> {
+  /** Returns the UUID for a category slug, creating the row if needed. `none` maps to null (no category). */
+  async resolveId(userId: string, slug: string): Promise<string | null> {
+    if (slug === NO_CATEGORY) return null;
+
     const userCache = this.cache.get(userId);
     if (userCache?.has(slug)) return userCache.get(slug)!;
 
@@ -43,8 +47,10 @@ export class CategoriesService {
     return this.cache.get(userId)?.get(slug) ?? await this.createCategory(userId, slug);
   }
 
-  /** Returns the slug (name) for a category UUID, or the UUID itself as fallback. */
-  async resolveSlug(userId: string, categoryId: string): Promise<string> {
+  /** Returns the slug (name) for a category UUID, `none` for null, or the UUID itself as fallback. */
+  async resolveSlug(userId: string, categoryId: string | null): Promise<string> {
+    if (!categoryId) return NO_CATEGORY;
+
     await this.ensureDefaults(userId);
     const userCache = this.cache.get(userId);
     for (const [slug, id] of userCache ?? []) {

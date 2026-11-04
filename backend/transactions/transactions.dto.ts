@@ -9,7 +9,7 @@ export type TransactionType = 'income' | 'expense' | 'transfer';
 export type TransactionCategory =
   | 'food' | 'transport' | 'shopping' | 'entertainment' | 'health'
   | 'utilities' | 'housing' | 'education' | 'salary' | 'investment'
-  | 'transfer' | 'other' | 'general';
+  | 'transfer' | 'other' | 'general' | 'none';
 
 export class CreateTransactionDto {
   @IsNumber()
@@ -24,10 +24,11 @@ export class CreateTransactionDto {
   type!: TransactionType;
 
   @IsString()
+  @IsOptional()
   @MinLength(1)
   @Transform(sanitize)
   @MaxLength(30)
-  category!: TransactionCategory;
+  category?: TransactionCategory;
 
   @IsOptional()
   @IsEnum(['increase', 'decrease', 'none'])
@@ -127,31 +128,26 @@ export class TransactionQueryDto {
   @IsOptional()
   @IsEnum(['income', 'expense', 'transfer'])
   @Transform(sanitize)
-  
   type?: TransactionType;
 
   @IsOptional()
   @IsString()
   @Transform(sanitize)
-  
   category?: string;
 
   @IsOptional()
   @IsString()
   @Transform(sanitize)
-  
   search?: string;
 
   @IsOptional()
   @IsString()
   @Transform(sanitize)
-  
   dateFrom?: string;
 
   @IsOptional()
   @IsString()
   @Transform(sanitize)
-  
   dateTo?: string;
 
   @IsOptional()
@@ -163,7 +159,6 @@ export class TransactionQueryDto {
   @IsOptional()
   @IsString()
   @Transform(sanitize)
-  
   merchant?: string;
 
   @IsOptional()

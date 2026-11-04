@@ -44,7 +44,7 @@ export type TransactionType = 'income' | 'expense' | 'transfer';
 export type TransactionCategory =
   | 'food' | 'transport' | 'shopping' | 'entertainment' | 'health'
   | 'utilities' | 'housing' | 'education' | 'salary' | 'investment'
-  | 'transfer' | 'other' | 'general';
+  | 'transfer' | 'other' | 'general' | 'none';
 
 export type BudgetImpact = 'increase' | 'decrease' | 'none';
 
@@ -81,6 +81,7 @@ export interface Budget {
   id: string;
   user_id: string;
   category: TransactionCategory;
+  category_id?: string;
   limit_amount: number;
   spent_amount: number;
   income_amount: number;

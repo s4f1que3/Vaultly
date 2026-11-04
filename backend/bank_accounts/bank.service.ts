@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { supabaseService } from "../supabase/supabase.service";
 import { ToHttpException } from "../exceptions/exception.service";
 
@@ -49,11 +49,10 @@ export class BankAccountsService {
         }
     }
 
-    async update(userId: string, accountId: string, opts: { name?: string; balance?: number; card_linked?: string}) {
+    async update(user_id: string, account_id: string, opts: { name?: string; balance?: number; card_linked?: string}) {
 
         const updates = {
             name: opts.name,
-            balance: opts.balance,
             card_linked: opts.card_linked
         }
         
@@ -61,13 +60,73 @@ export class BankAccountsService {
         const { data, error } = await this.supabase.db
             .from('bank_account')
             .update(updates)
-            .eq('id', accountId)
-            .eq('user_id', userId)
+            .eq('id', account_id)
+            .eq('user_id', user_id)
             .select()
             .single();
 
         if (error) throw ToHttpException(error);
+
+        if(opts.balance) {
+            const {data: bank, error: berror} = await this.supabase.db
+            .from('bank_account')
+            .update({
+                balance: opts.balance
+            })
+            .eq('user_id', user_id)
+            .eq('id', account_id)
+            .select()
+            .single()
+
+            if(berror) throw ToHttpException(berror)
+            if(bank.card_linked === null) 
+                return bank
+            else {
+                const {error} = await this.supabase.db
+                .from('Cards')
+                .update({
+                    balance: opts.balance
+                })
+                .eq('user_id', user_id)
+                .eq('id', bank.card_linked)
+
+                if(error) throw ToHttpException(error)
+                return bank
+            }
+
+        }
         return data;
+    }
+
+    async transfer (user_id: string, current_account: string, destination_account: string, amount: number) {
+        if(current_account === destination_account) throw new BadRequestException("Can't transfer to the same account")
+        const {data, error} = await this.supabase.db
+        .from('bank_account')
+        .select('balance')
+        .eq('id', current_account)
+        .eq('user_id', user_id)
+        .single()
+
+        if(error) throw ToHttpException(error)
+        if(!data.balance) throw new NotFoundException('No balance returned for this account')
+        if(amount > data.balance) throw new BadRequestException('Transfer amount cannot exceed balance')
+
+        const {data: d, error: e} = await this.supabase.db
+        .from('bank_account')
+        .select('balance')
+        .eq('id', destination_account)
+        .eq('user_id', user_id)
+        .single()
+
+        if(e) throw ToHttpException(e)
+        if(!d.balance) throw new NotFoundException('No balance returned for this account')
+
+
+        const current_account_new_balance = data.balance - amount
+        const destination_account_new_balance = d.balance + amount
+
+        await this.doBankTransfer(user_id, current_account, destination_account, current_account_new_balance, destination_account_new_balance)
+        
     }
 
     async delete(userId: string, accountId: string) {
@@ -88,5 +147,31 @@ export class BankAccountsService {
             .eq('user_id', userId);
 
         if (error) throw ToHttpException(error);
+    }
+
+
+
+    /////
+    async doBankTransfer (user_id: string, c_acc: string, d_acc: string, c_amount: number, d_amount: number) {
+        const {data, error} = await this.supabase.db
+        .from('bank_account')
+        .update({
+            balance: c_amount
+        })
+        .eq('id', c_acc)
+        .eq('user_id', user_id)
+
+        if(error) throw ToHttpException(error)
+            
+        const {data: d, error: e} = await this.supabase.db
+        .from('bank_account')
+        .update({
+            balance: d_amount
+        })
+        .eq('id', d_acc)
+        .eq('user_id', user_id)
+
+        if(e) throw ToHttpException(e)
+        return d && data
     }
 }

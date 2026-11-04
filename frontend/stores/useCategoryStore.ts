@@ -10,7 +10,16 @@ export interface CustomCategory {
   is_default: boolean;
 }
 
+export interface CategoryRow {
+  id: string;
+  name: string;
+  icon: string;
+  color: string;
+  is_default: boolean;
+}
+
 interface CategoryStore {
+  categories: CategoryRow[];   // every category from the database, defaults included
   customCategories: CustomCategory[];
   isLoaded: boolean;
   fetchCategories: () => Promise<void>;
@@ -18,13 +27,13 @@ interface CategoryStore {
 }
 
 export const useCategoryStore = create<CategoryStore>((set, get) => ({
+  categories: [],
   customCategories: [],
   isLoaded: false,
 
   fetchCategories: async () => {
     if (get().isLoaded) return;
     try {
-      type CategoryRow = { name: string; icon: string; color: string; is_default: boolean };
       const res = await api.get<{ data: CategoryRow[] }>('/categories');
       const all = res.data ?? [];
 
@@ -45,7 +54,7 @@ export const useCategoryStore = create<CategoryStore>((set, get) => ({
         }
       });
 
-      set({ customCategories: custom, isLoaded: true });
+      set({ categories: all, customCategories: custom, isLoaded: true });
     } catch {
       set({ isLoaded: true });
     }
@@ -62,6 +71,9 @@ export const useCategoryStore = create<CategoryStore>((set, get) => ({
     (CATEGORY_COLORS as Record<string, string>)[slug] = color;
 
     set((s) => ({ customCategories: [...s.customCategories, newCat] }));
+    // Re-fetch so the new category's id is available for budget lookups
+    set({ isLoaded: false });
+    await get().fetchCategories();
     return slug;
   },
 }));

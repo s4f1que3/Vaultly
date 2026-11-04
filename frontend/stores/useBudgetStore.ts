@@ -34,7 +34,7 @@ export const useBudgetStore = create<BudgetState>((set, get) => ({
   updateBudget: async (id, data) => {
     const prev = get().budgets;
     set((state) => ({
-      budgets: state.budgets.map((b) => b.id === id ? { ...b, ...data } : b),
+      budgets: state.budgets.map((b) => b.id === id ? { ...b, ...data, category_id: data.category ?? b.category_id } : b),
     }));
     try {
       await api.patch(`/budgets/${id}`, data);

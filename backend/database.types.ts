@@ -54,10 +54,12 @@ export type Database = {
           alert_threshold: number | null
           category_id: string
           created_at: string
+          icon: string | null
           id: string
           income_amount: number | null
           limit_amount: number
           month: number
+          name: string | null
           rollover_amount: number | null
           rollover_enabled: boolean
           spent_amount: number
@@ -68,10 +70,12 @@ export type Database = {
           alert_threshold?: number | null
           category_id: string
           created_at?: string
+          icon?: string | null
           id?: string
           income_amount?: number | null
           limit_amount: number
           month: number
+          name?: string | null
           rollover_amount?: number | null
           rollover_enabled?: boolean
           spent_amount?: number
@@ -82,10 +86,12 @@ export type Database = {
           alert_threshold?: number | null
           category_id?: string
           created_at?: string
+          icon?: string | null
           id?: string
           income_amount?: number | null
           limit_amount?: number
           month?: number
+          name?: string | null
           rollover_amount?: number | null
           rollover_enabled?: boolean
           spent_amount?: number
@@ -587,7 +593,7 @@ export type Database = {
           bank_account_id: string | null
           budget_impact: string | null
           card_id: string | null
-          category_id: string
+          category_id: string | null
           created_at: string
           date: string
           description: string
@@ -602,7 +608,7 @@ export type Database = {
           bank_account_id?: string | null
           budget_impact?: string | null
           card_id?: string | null
-          category_id: string
+          category_id?: string | null
           created_at?: string
           date: string
           description: string
@@ -617,7 +623,7 @@ export type Database = {
           bank_account_id?: string | null
           budget_impact?: string | null
           card_id?: string | null
-          category_id?: string
+          category_id?: string | null
           created_at?: string
           date?: string
           description?: string

@@ -70,6 +70,7 @@ export const CATEGORY_LABELS: Record<TransactionCategory, string> = {
   transfer: 'Transfer',
   other: 'Other',
   general: 'General',
+  none: 'None',
 };
 
 export const CATEGORY_COLORS: Record<TransactionCategory, string> = {
@@ -86,6 +87,7 @@ export const CATEGORY_COLORS: Record<TransactionCategory, string> = {
   transfer: '#9c9585',
   other: '#5c5648',
   general: '#94a3b8',
+  none: '#6b7280',
 };
 
 export const CATEGORY_ICONS: Record<TransactionCategory, string> = {
@@ -102,4 +104,5 @@ export const CATEGORY_ICONS: Record<TransactionCategory, string> = {
   transfer: '🔄',
   other: '📦',
   general: '🗂️',
+  none: '⊘',
 };

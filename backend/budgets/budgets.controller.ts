@@ -11,21 +11,24 @@ export class BudgetsController {
   constructor(private readonly service: BudgetsService) {}
 
   @Get()
-  findAll(@CurrentUser() user: User) { return this.service.findAll(user.id); }
+  findAll(@CurrentUser() user: User) { 
+    return this.service.findAll(user.id); 
+  }
 
   @Get('history')
   getHistory(@CurrentUser() user: User, @Query('months') months?: string) {
     return this.service.getHistory(user.id, months ? parseInt(months) : 6);
   }
 
-  @Post('rollover')
-  rollover(@CurrentUser() user: User) { return this.service.rolloverForUser(user.id); }
-
   @Post()
-  create(@CurrentUser() user: User, @Body() dto: CreateBudgetDto) { return this.service.create(user.id, dto); }
+  create(@CurrentUser() user: User, @Body() dto: CreateBudgetDto) { 
+    return this.service.create(user.id, dto.name, dto.limit_amount, dto.icon, dto.category, dto.alert_threshold);
+  }
 
   @Patch(':id')
-  update(@CurrentUser() user: User, @Param('id') id: string, @Body() dto: UpdateBudgetDto) { return this.service.update(user.id, id, dto); }
+  update(@CurrentUser() user: User, @Param('id') id: string, @Body() dto: UpdateBudgetDto) { 
+    return this.service.update(user.id, id, {name: dto.name, limit: dto.limit_amount, icon: dto.icon, category: dto.category, alert_threshold: dto.alert_threshold}); 
+  }
 
   @Patch(':id/rollover')
   toggleRollover(@CurrentUser() user: User, @Param('id') id: string, @Body() body: { enabled: boolean }) {
@@ -33,5 +36,7 @@ export class BudgetsController {
   }
 
   @Delete(':id')
-  delete(@CurrentUser() user: User, @Param('id') id: string) { return this.service.delete(user.id, id); }
+  delete(@CurrentUser() user: User, @Param('id') id: string) { 
+    return this.service.delete(user.id, id); 
+  }
 }

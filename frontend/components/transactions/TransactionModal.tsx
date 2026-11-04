@@ -35,7 +35,7 @@ interface Props {
 }
 
 const DEFAULT_CATEGORIES: TransactionCategory[] = [
-  'food', 'transport', 'shopping', 'entertainment', 'health',
+  'none', 'food', 'transport', 'shopping', 'entertainment', 'health',
   'utilities', 'housing', 'education', 'salary', 'investment', 'transfer', 'other', 'general',
 ];
 
